@@ -20,6 +20,7 @@ import java.util.List;
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name="ROLE_ID")
     private Long id;
 
     private String name;

@@ -18,11 +18,12 @@ public class Privilege {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "PRIVILEGE_ID")
     private Long id;
 
     private String name;
 
-    @OneToMany(mappedBy = "privilege")
+    @OneToMany(mappedBy = "privilege", fetch = FetchType.EAGER)
     private List<RolePrivilege> rolePrivileges = new ArrayList<>();
 
 

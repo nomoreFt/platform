@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 public class RolePrivilege {
     @Id
     @GeneratedValue
+    @Column(name="ROLEPRIVILEGE_ID")
     private Long id;
 
     @ManyToOne

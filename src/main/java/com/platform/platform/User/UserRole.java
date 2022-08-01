@@ -11,6 +11,7 @@ import java.util.List;
 public class UserRole {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "USERROLE_ID")
     private Long id;
 
     @ManyToOne
