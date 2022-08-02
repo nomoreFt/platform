@@ -27,7 +27,7 @@ public class Role {
 
     @OneToMany(mappedBy = "role")
     private List<UserRole> users = new ArrayList<>();
-    @OneToMany(mappedBy = "role")
+    @OneToMany(mappedBy = "role", fetch = FetchType.EAGER)
     private List<RolePrivilege> rolePrivileges = new ArrayList<>();
 
     void addRolePrivilege(RolePrivilege rolePrivilege) {

@@ -45,7 +45,7 @@ class CustomUserDetailServiceTest {
 
             assertThat(user1.getAuthorities())
                     .extracting(GrantedAuthority::getAuthority)
-                    .contains("ROLE_TEMPORARY_USER, COMMUNICATION_AUTHORITY");
+                    .contains("ROLE_TEMPORARY_USER", "COMMUNICATION_AUTHORITY");
         }
 
     }

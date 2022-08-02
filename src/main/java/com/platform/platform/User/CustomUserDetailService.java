@@ -1,7 +1,9 @@
 package com.platform.platform.User;
 
+import com.platform.platform.security.PrivilegeRepository;
 import com.platform.platform.security.Role;
 import com.platform.platform.security.RolePrivilege;
+import com.platform.platform.security.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,6 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.model.IProcessingInstruction;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,22 +23,20 @@ import java.util.stream.Stream;
 public class CustomUserDetailService implements UserDetailsService {
 
     private final UserService userService;
+    private final RoleRepository roleRepository;
+    private final PrivilegeRepository privilegeRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userService.getUser(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User is not found, email = " + email));
+        List<RolePrivilege> RolePrivileges = user.getUserRoles().stream().map(userRole -> userRole.getRole().getRolePrivileges()).flatMap(Collection::stream).collect(Collectors.toList());
+
 
         user.setAuthorities(
                 Stream.concat(
                         getRoles(user.getUserRoles()).stream(),
-                        getPrivileges(user.getUserRoles().stream()
-                                .flatMap(
-                                        userRole -> userRole
-                                                .getRole()
-                                                .getRolePrivileges()
-                                                .stream()
-                                ).collect(Collectors.toList())).stream()
+                        getPrivileges(RolePrivileges).stream()
                         ).collect(Collectors.toList())
         );
         return user;
