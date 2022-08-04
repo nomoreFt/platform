@@ -2,11 +2,14 @@ package com.platform.platform.User;
 
 import com.platform.platform.security.Role;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Entity
 public class UserRole {
     @Id
@@ -14,7 +17,7 @@ public class UserRole {
     @Column(name = "USERROLE_ID")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID")
     private User user;
 

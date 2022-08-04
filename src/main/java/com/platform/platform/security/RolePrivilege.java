@@ -1,12 +1,15 @@
 package com.platform.platform.security;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @Entity
 public class RolePrivilege {
     @Id
@@ -14,11 +17,11 @@ public class RolePrivilege {
     @Column(name="ROLEPRIVILEGE_ID")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ROLE_ID")
     private Role role;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PRIVILEGE_ID")
     private Privilege privilege;
 

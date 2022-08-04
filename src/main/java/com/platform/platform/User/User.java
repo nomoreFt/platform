@@ -1,10 +1,7 @@
 package com.platform.platform.User;
 
 import com.platform.platform.entity.Member;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,7 +13,8 @@ import java.util.List;
 
 @Entity
 @Builder
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name="XUSER")
@@ -37,7 +35,7 @@ public class User implements UserDetails {
     @Transient
     private Collection<SimpleGrantedAuthority> authorities;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<UserRole> userRoles = new ArrayList<>();
 
     void addUserRole(UserRole userRole) {

@@ -1,16 +1,14 @@
 package com.platform.platform.security;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Builder
-@Data
+@Getter
+@Setter
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,7 +21,7 @@ public class Privilege {
 
     private String name;
 
-    @OneToMany(mappedBy = "privilege", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "privilege", fetch = FetchType.LAZY)
     private List<RolePrivilege> rolePrivileges = new ArrayList<>();
 
 
