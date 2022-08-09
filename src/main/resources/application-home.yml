@@ -2,9 +2,7 @@ spring:
   datasource:
     schema: classpath*:db/schema.sql
     data: classpath*:db/data.sql
-  redis:
-    host: localhost
-    port: 6379
+
 server:
   port: 9999
 
