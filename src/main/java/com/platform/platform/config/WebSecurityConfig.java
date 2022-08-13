@@ -1,18 +1,13 @@
 package com.platform.platform.config;
 
-import com.platform.platform.security.jwt.CustomAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.token.TokenService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -27,7 +22,6 @@ WebSecurityConfigurerAdapter가 사장되면서, @Override로 설정하던 기�
 @RequiredArgsConstructor
 public class WebSecurityConfig /*implements WebSecurityConfigurer*/ {
 
-    private final CustomAuthenticationFilter customAuthenticationFilter;
     //기존 방식
     /*   @Override
         protected void configure(HttpSecurity http) throws Exception {
@@ -70,8 +64,8 @@ public class WebSecurityConfig /*implements WebSecurityConfigurer*/ {
                 //토큰으로 security 적용하기 때문에 session stateless
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .formLogin().disable()
-                .addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .formLogin().disable();
+                //.addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
