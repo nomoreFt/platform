@@ -1,13 +1,20 @@
 package com.platform.platform.config;
 
+import com.platform.platform.User.CustomUserDetailService;
+import com.platform.platform.security.jwt.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.ldap.EmbeddedLdapServerContextSourceFactoryBean;
+import org.springframework.security.config.ldap.LdapBindAuthenticationManagerFactory;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -21,6 +28,9 @@ WebSecurityConfigurerAdapter가 사장되면서, @Override로 설정하던 기�
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class WebSecurityConfig /*implements WebSecurityConfigurer*/ {
+    private final JwtFilter jwtFilter;
+    private final CustomUserDetailService userDetailService;
+
 
     //기존 방식
     /*   @Override
@@ -41,7 +51,7 @@ public class WebSecurityConfig /*implements WebSecurityConfigurer*/ {
         @Bean
         @Override
         public UserDetailsService userDetailsService() {
-            UserDetails user =
+            UserDetailsuser =
                     User.withDefaultPasswordEncoder()
                             .username("user")
                             .password("password")
@@ -59,18 +69,37 @@ public class WebSecurityConfig /*implements WebSecurityConfigurer*/ {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         http.csrf().disable()
-                .authorizeRequests()
-                .anyRequest().permitAll().and()
-                //토큰으로 security 적용하기 때문에 session stateless
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .formLogin().disable();
-                //.addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .authorizeRequests().antMatchers("/authenticate").permitAll()
+                .anyRequest().authenticated()// authenticate 말고 다 보안
+                .and().exceptionHandling().and().sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
+
 
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+
+    @Bean
+    public EmbeddedLdapServerContextSourceFactoryBean contextSourceFactoryBean() {
+        EmbeddedLdapServerContextSourceFactoryBean contextSourceFactoryBean =
+                EmbeddedLdapServerContextSourceFactoryBean.fromEmbeddedLdapServer();
+        contextSourceFactoryBean.setPort(0);
+        return contextSourceFactoryBean;
+    }
+
+    @Bean
+    AuthenticationManager ldapAuthenticationManager(
+            BaseLdapPathContextSource contextSource) {
+        LdapBindAuthenticationManagerFactory factory =
+                new LdapBindAuthenticationManagerFactory(contextSource);
+        factory.setUserDnPatterns("uid={0},ou=people");
+        factory.setUserDetailsContextMapper(new PersonContextMapper());
+        return factory.createAuthenticationManager();
+    }
+
 }
