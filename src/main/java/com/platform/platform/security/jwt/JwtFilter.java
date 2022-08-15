@@ -1,6 +1,7 @@
 package com.platform.platform.security.jwt;
 
 import com.platform.platform.User.CustomUserDetailService;
+import com.platform.platform.User.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,7 +40,7 @@ public class JwtFilter extends OncePerRequestFilter {
         //3.token이 정상적이란 의미. authentication이 비어있으면 최초인증이므로
         //userEmail을 통해서 SpringSecurity Authentication에 필요한 정보 Set
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = service.loadUserByUsername(userEmail);
+            User userDetails = (User) service.loadUserByUsername(userEmail);
 
             if (jwtUtils.validateToken(token, userDetails)) {
 

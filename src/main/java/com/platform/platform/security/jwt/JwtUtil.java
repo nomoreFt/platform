@@ -1,5 +1,6 @@
 package com.platform.platform.security.jwt;
 
+import com.platform.platform.User.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -59,9 +60,9 @@ public class JwtUtil {
     }
 
     //토큰 만료 확인
-    public Boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUserEmail(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    public Boolean validateToken(String token, User userDetails) {
+        final String userEmail = extractUserEmail(token);
+        return (userEmail.equals(userDetails.getEmail()) && !isTokenExpired(token));
     }
 
 
