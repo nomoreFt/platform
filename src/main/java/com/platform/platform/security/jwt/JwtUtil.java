@@ -14,7 +14,6 @@ import java.util.function.Function;
 
 @Service
 public class JwtUtil {
-
     private String secret = "javatechie";
 
     //토큰에서 userEmail 추출
@@ -64,7 +63,4 @@ public class JwtUtil {
         final String userEmail = extractUserEmail(token);
         return (userEmail.equals(userDetails.getEmail()) && !isTokenExpired(token));
     }
-
-
-
 }

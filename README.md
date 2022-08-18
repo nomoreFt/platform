@@ -24,20 +24,25 @@
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
+    
+    //유저 검증 (추후에 생성)
     private final CustomUserDetailService userDetailService;
+    //request오면 JWT TOKEN 검증 Filter (추후에 생성)  
     private final JwtFilter jwtFilter;
 
+    //password 암호화 전략
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+     
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
-
+    
+    
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable().authorizeRequests().antMatchers("/authenticate")
@@ -82,13 +87,17 @@ public class SecurityConfig {
 
 ### JwtFilter
 
+REQUEST가 들어오면 사전에 JWT 토큰을 검증하는 Filter
+
 ```java
 @Component
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
+    //TOKEN 생성, 계정 추출 등 JWT 검증을 위해 사용되는 각종 도구들 (추후 생성)
     private final JwtUtil jwtUtils;
     private final CustomUserDetailService service;
-
+    
+    
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         //1.Request로부터 Authorization Header값 추출
@@ -125,9 +134,66 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 }
 ```
-* 
+* doFilterInternal : filter 동작을 수행. request Header에 담긴 `Authorization : "Bearer 토큰암호화"` 값 
+추출해서 context에 인증 정보 담기  
 
 
+```java
+
+@Service
+public class JwtUtil {
+    private String secret = "javatechie";
+
+    //토큰에서 userEmail 추출
+    public String extractUserEmail(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+
+    //토큰 만료시간 추출
+    public Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+    }
+
+    //토큰 만료 확인
+    private Boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+
+    public String generateToken(String username) {
+        Map<String, Object> claims = new HashMap<>();
+        return createToken(claims, username);
+    }
+
+    //토큰 생성
+    //claims = token으로 만들 실질적인 값
+    //sign = token의 signature 설정. 알고리즘 + secret key 사용
+    private String createToken(Map<String, Object> claims, String subject) {
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(subject)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
+                .signWith(SignatureAlgorithm.HS256, secret).compact();
+    }
+
+    //토큰 만료 확인
+    public Boolean validateToken(String token, User userDetails) {
+        final String userEmail = extractUserEmail(token);
+        return (userEmail.equals(userDetails.getEmail()) && !isTokenExpired(token));
+    }
+}
+
+```
 
 
 
