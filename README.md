@@ -137,6 +137,9 @@ public class JwtFilter extends OncePerRequestFilter {
 * doFilterInternal : filter 동작을 수행. request Header에 담긴 `Authorization : "Bearer 토큰암호화"` 값 
 추출해서 context에 인증 정보 담기  
 
+### JwtUtil
+
+Token에 적용된 알고리즘과 그 key 값을 가지고 토큰 암호화, 복호화, 만료 확인, 유저 추출 등을 한다.
 
 ```java
 
@@ -195,11 +198,70 @@ public class JwtUtil {
 
 ```
 
+### Controller
+
+```java
+@RestController
+@RequiredArgsConstructor
+public class WelcomeController {
+
+    private final JwtUtil jwtUtil;
+    private final AuthenticationManager authenticationManager;
+    
+    //JWT 토큰을 뚫고 검증된 것을 확인하는 경로
+    @GetMapping("/")
+    public String welcome() {
+
+        return "Welcome to site";
+    }
+
+    //token 발급
+    @PostMapping("/authenticate")
+    public String generateToken(@RequestBody AuthRequest authRequest) throws Exception {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken((authRequest.getUserEmail()), authRequest.getPassword()));
+        } catch (Exception exception) {
+            throw new Exception("invalid username/password");
+        }
+        return jwtUtil.generateToken(authRequest.getUserEmail());
+    }
+
+}
+
+```
 
 
+### 작동 순서
+
+1. Request가 들어오면 초기 filter 작동해서 /authenticate만 permit,
+   jwtFilter를 등록했기때문에 jwtFilter의 doFilter 작동
+```java
+@Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.csrf().disable().authorizeRequests().antMatchers("/authenticate")
+                .permitAll().anyRequest().authenticated()
+                .and().exceptionHandling().and().sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+    }
+```
+
+2. JwtFilter 
+
+* header에서 담긴 Token 추출, 
+* Token 검증 (Token에 담긴 PW, ID 추출해서 UserDetailService로 검증)
+* 추후에 사용하기 위해 SecurityContextHolder에 authentication에 토큰 담기 (인증된 유저 정보)
+
+3. 인증된 Token을 사용하여 다른 URI 자원에 접근가능 ()
+
+# Test
+
+### Token 발급 모습
+![](../../../../../var/folders/67/v2hfg63s6hqgn0fzpz3z454r0000gn/T/TemporaryItems/NSIRD_screencaptureui_PhbG8B/스크린샷 2022-08-22 오후 11.50.31.png)
 
 
-![](../../../../../var/folders/67/v2hfg63s6hqgn0fzpz3z454r0000gn/T/TemporaryItems/NSIRD_screencaptureui_sKjalp/스크린샷 2022-08-15 오후 10.50.10.png)
+### 토큰 입력으로 JWT 인증 성공한 뒤, URI 자원에 접근한 모습
+![](../../../../../var/folders/67/v2hfg63s6hqgn0fzpz3z454r0000gn/T/TemporaryItems/NSIRD_screencaptureui_cX5DlI/스크린샷 2022-08-22 오후 11.51.13.png)
 
-![](../../../../../var/folders/67/v2hfg63s6hqgn0fzpz3z454r0000gn/T/TemporaryItems/NSIRD_screencaptureui_k3gYX7/스크린샷 2022-08-15 오후 10.49.56.png)
-![](../../../../../var/folders/67/v2hfg63s6hqgn0fzpz3z454r0000gn/T/TemporaryItems/NSIRD_screencaptureui_uWo6JC/스크린샷 2022-08-15 오후 10.54.57.png)
