@@ -259,9 +259,8 @@ public class WelcomeController {
 # Test
 
 ### Token 발급 모습
-![](../../../../../var/folders/67/v2hfg63s6hqgn0fzpz3z454r0000gn/T/TemporaryItems/NSIRD_screencaptureui_PhbG8B/스크린샷 2022-08-22 오후 11.50.31.png)
+<img width="867" alt="스크린샷 2022-08-23 오전 12 00 50" src="https://user-images.githubusercontent.com/37995817/185953678-a60ec6da-73de-4057-aedc-fe795212eefe.png">
 
 
 ### 토큰 입력으로 JWT 인증 성공한 뒤, URI 자원에 접근한 모습
-![](../../../../../var/folders/67/v2hfg63s6hqgn0fzpz3z454r0000gn/T/TemporaryItems/NSIRD_screencaptureui_cX5DlI/스크린샷 2022-08-22 오후 11.51.13.png)
-
+<img width="873" alt="스크린샷 2022-08-23 오전 12 00 28" src="https://user-images.githubusercontent.com/37995817/185953571-1accea76-081a-414a-8b8f-c6e964a7ff24.png">
